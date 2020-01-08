@@ -1,0 +1,61 @@
+ The project must be made completely on command line. You should share the complete source code via Github only. And also share the screenshots of the complete application. Also submit a report elucidating the strategy adopted, the reason behind it and how it is implemented. Even if you fail to create a proper solution for this problem, your learning while solving this problem is going to be immense. In that case, share your learnings and points where you got stuck in your report. 
+
+import numpy as np
+import matplotlib.pyplot as plt
+import keras
+from keras.datasets import mnist
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.optimizers import Adam
+from keras.utils.np_utils import to_categorical
+import random
+
+np.random.seed(0)
+
+(X_train, y_train) , (X_test, y_test) = mnist.load_data() 
+
+print(X_train.shape)
+print(X_test.shape)
+img = X_test[201]
+print(y_test[201])
+
+number_of_samples = []
+cols = 5
+num_classes = 10
+
+y_train = to_categorical(y_train, 10)
+y_test = to_categorical(y_test, 10)
+
+X_train = X_train/255
+X_test = X_test/255
+
+num_pixels = 784
+
+X_train = X_train.reshape(X_train.shape[0], num_pixels)
+X_test = X_test.reshape(X_test.shape[0], num_pixels)
+
+def create_model():
+    model = Sequential()
+    model.add(Dense(10,input_dim=num_pixels, activation = 'relu'))
+    model.add(Dense(10, activation='relu'))
+    model.add(Dense(10, activation='relu'))
+    model.add(Dense(num_classes, activation='softmax'))
+    model.compile(Adam(lr=0.01), loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+model = create_model()
+print(model.summary())
+
+history= model.fit(X_train,y_train, validation_split=0.1, epochs=12, batch_size=200, verbose = 1, shuffle = 1)
+
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+
+score = model.evaluate(X_test, y_test, verbose=0)
+print('Test score: ' ,score[0])
+print('Test accuracy:', score[1])
+
+img= img/255
+img= img.reshape(1,784)
+prediction = model.predict_classes(img)
+print('Predicted Digit: ', str(prediction))
